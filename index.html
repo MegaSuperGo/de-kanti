@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deutsch Trainer</title>
+<style>
+:root{
+  --bg:#f5f3ee;--card:#ffffff;--ink:#1d1b18;--muted:#6b665e;--line:#e3ded3;--soft:#efece5;
+  --accent:#3b5bdb;--accent-ink:#fff;
+  --ok:#237a37;--ok-bg:#e5f4e9;--bad:#c02626;--bad-bg:#fdeaea;--warn:#9a5200;--warn-bg:#fff2dc;
+  --der:#2f6fdb;--die:#d6336c;--das:#1f9461;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15161a;--card:#1f2026;--ink:#ecebe8;--muted:#a19d95;--line:#33343c;--soft:#282930;
+  --accent:#7c94ff;--accent-ink:#0f1020;
+  --ok:#6fd18a;--ok-bg:#183222;--bad:#ff8a8a;--bad-bg:#3a1c1e;--warn:#ffc06b;--warn-bg:#3a2a12;
+  --der:#6ea0ff;--die:#ff7aa8;--das:#4fd39a;--shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#15161a;--card:#1f2026;--ink:#ecebe8;--muted:#a19d95;--line:#33343c;--soft:#282930;
+  --accent:#7c94ff;--accent-ink:#0f1020;
+  --ok:#6fd18a;--ok-bg:#183222;--bad:#ff8a8a;--bad-bg:#3a1c1e;--warn:#ffc06b;--warn-bg:#3a2a12;
+  --der:#6ea0ff;--die:#ff7aa8;--das:#4fd39a;--shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+h1{font-size:22px;margin:0;letter-spacing:-.01em;cursor:pointer}
+h1 span{color:var(--accent)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;color:var(--ink);cursor:pointer}
+.pill b{color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ex{cursor:pointer;transition:transform .12s,border-color .12s;display:flex;flex-direction:column;gap:6px}
+.ex:hover{transform:translateY(-2px);border-color:var(--accent)}
+.ex .num{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.ex h3{margin:0;font-size:17px}
+.ex p{margin:0;color:var(--muted);font-size:14px}
+.ex .meta{margin-top:auto;font-size:13px;color:var(--muted)}
+.ex.lib{border-style:dashed}
+.ex.lib .num{color:var(--bad)}
+.opts{display:flex;align-items:center;gap:10px;margin:18px 2px 0;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.opts label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 12px;cursor:pointer;font:inherit;font-size:14px}
+.bar{flex:1;height:8px;background:var(--soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.count{font-size:13px;color:var(--muted);white-space:nowrap}
+.kicker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:10px}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--muted)}
+.tag.rep{background:var(--warn-bg);color:var(--warn)}
+.tag.bonus{background:var(--soft);color:var(--accent)}
+.prompt{font-size:34px;font-weight:700;letter-spacing:-.02em;margin:6px 0 4px;overflow-wrap:anywhere}
+.prompt .art{color:var(--muted);font-weight:500}
+.hint{color:var(--muted);font-size:14px;margin-bottom:12px}
+.sentence{font-size:22px;line-height:1.6;margin:8px 0 14px}
+.sentence mark{background:var(--bad-bg);color:var(--bad);padding:1px 6px;border-radius:6px;text-decoration:line-through;text-decoration-thickness:2px}
+.sentence .blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:600;text-align:center}
+.sentence .base{color:var(--muted);font-size:16px}
+.answer{display:flex;align-items:stretch;border:2px solid var(--line);border-radius:12px;background:var(--bg);overflow:hidden;transition:border-color .15s}
+.answer:focus-within{border-color:var(--accent)}
+.answer .prefix{padding:12px 4px 12px 14px;font-size:20px;color:var(--muted);font-weight:600}
+.answer input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:20px;padding:12px 14px;outline:none}
+.answer.ok{border-color:var(--ok)}.answer.bad{border-color:var(--bad)}
+.uml{display:flex;gap:6px;margin:10px 0 0;flex-wrap:wrap}
+.uml button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 12px;font:inherit;cursor:pointer}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.arts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.arts button{font:inherit;font-size:22px;font-weight:700;padding:18px 0;border-radius:14px;border:2px solid var(--line);background:var(--card);cursor:pointer;transition:transform .1s}
+.arts button:hover:not(:disabled){transform:translateY(-2px)}
+.arts .der{color:var(--der)}.arts .die{color:var(--die)}.arts .das{color:var(--das)}
+.arts button.picked-ok{background:var(--ok-bg);border-color:var(--ok)}
+.arts button.picked-bad{background:var(--bad-bg);border-color:var(--bad)}
+.arts button.is-right{border-color:var(--ok)}
+.arts button small{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.fb{margin-top:16px;border-radius:12px;padding:14px 16px;font-size:15px;display:none}
+.fb.show{display:block;animation:pop .2s ease}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb strong{font-size:17px}
+.fb .note{color:var(--ink);opacity:.85;margin-top:6px}
+.fb .sub{margin-top:4px}
+.fb .libmsg{margin-top:8px;font-weight:600;color:var(--warn)}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.stats{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+.stat{flex:1;min-width:100px;background:var(--soft);border-radius:12px;padding:12px;text-align:center}
+.stat b{display:block;font-size:26px}
+.stat span{font-size:13px;color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.li{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.li .main{flex:1;min-width:0}
+.li .q{font-weight:600}
+.li .a{color:var(--ok)}
+.li .w{color:var(--bad);font-size:14px}
+.li .n{color:var(--muted);font-size:13px}
+.li .x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px}
+.li .cnt{font-size:12px;font-weight:700;color:var(--bad);background:var(--bad-bg);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.li .mast{font-size:12px;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.filter{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.filter button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:99px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
+.filter button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.keys{font-size:12px;color:var(--muted);margin-top:14px}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:11px;background:var(--card)}
+@media (max-width:520px){.prompt{font-size:28px}.sentence{font-size:19px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="home">Deutsch <span>Trainer</span></h1>
+    <button class="pill" id="libPill">📚 Fehler-Bibliothek <b id="libCount">0</b></button>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ================= DATEN ================= */
+const PLURAL_CORE = [
+ ["der Boss",["Bosse"],""],
+ ["das Holz",["Hölzer"],"Umlaut + -er."],
+ ["der Ballon",["Ballons","Ballone"],"Ballone ist eher süddeutsch/österreichisch."],
+ ["der Advokat",["Advokaten"],"n-Deklination: des Advokaten, die Advokaten."],
+ ["das Prinzip",["Prinzipien","Prinzipe"],""],
+ ["das Material",["Materialien"],""],
+ ["der Atlas",["Atlanten","Atlasse"],""],
+ ["die Basis",["Basen"],""],
+ ["das Dogma",["Dogmen"],""],
+ ["das Drama",["Dramen"],""],
+ ["das Konto",["Konten","Kontos","Konti"],"Am häufigsten: Konten."],
+ ["der Mechanismus",["Mechanismen"],"-us → -en"],
+ ["die Praxis",["Praxen"],"Plural nur im Sinne von „Arztpraxen“."],
+ ["der Radius",["Radien"],""],
+ ["das Lexikon",["Lexika","Lexiken"],""],
+ ["der Index",["Indizes","Indexe","Indices"],""],
+ ["der Kodex",["Kodizes","Kodexe","Codices"],""],
+ ["das Genus",["Genera"],"Achtung: Es heisst <b>das</b> Genus (grammatisches Geschlecht), nicht der Genus.","Achtung: Artikel!"],
+ ["das Tempus",["Tempora"],""],
+ ["der Kasus",["Kasus"],"Gleiche Schreibung wie der Singular – nur mit langem u gesprochen: die Kasūs."],
+ ["der Espresso",["Espressos","Espressi"],""],
+ ["der Mafioso",["Mafiosi"],""],
+ ["die Pizza",["Pizzas","Pizzen"],""],
+ ["das Solo",["Soli","Solos"],""],
+ ["der Spaghetto",["Spaghetti"],"„Spaghetti“ ist schon Plural! Der (seltene) Singular ist der Spaghetto.","Singular von Spaghetti"],
+ ["das Kompositum",["Komposita"],"-um → -a"],
+];
+const PLURAL_BONUS = [
+ ["das Visum",["Visa","Visen"],""],
+ ["das Museum",["Museen"],""],
+ ["das Album",["Alben"],""],
+ ["der Kaktus",["Kakteen","Kaktusse"],"Kakteen ist die Standardform."],
+ ["das Virus",["Viren"],""],
+ ["das Thema",["Themen","Themata"],""],
+ ["das Komma",["Kommas","Kommata"],""],
+ ["das Praktikum",["Praktika"],""],
+ ["der Modus",["Modi"],""],
+ ["das Schema",["Schemata","Schemas","Schemen"],""],
+ ["der Zyklus",["Zyklen"],""],
+ ["das Stadion",["Stadien"],""],
+ ["der Status",["Status"],"Unverändert (gesprochen mit langem u)."],
+ ["das Risiko",["Risiken","Risikos"],""],
+ ["das Klima",["Klimata","Klimas","Klimate"],""],
+ ["der Organismus",["Organismen"],""],
+ ["das Fresko",["Fresken"],""],
+ ["der Globus",["Globen","Globusse"],""],
+ ["das Gremium",["Gremien"],""],
+ ["der Bus",["Busse"],"Doppel-s!"],
+ ["die Firma",["Firmen"],""],
+ ["das Datum",["Daten"],"Daten = Kalenderdaten und Informationen."],
+ ["das Aroma",["Aromen","Aromas"],""],
+ ["der Rhythmus",["Rhythmen"],""],
+ ["das Epos",["Epen"],""],
+ ["das Tempo",["Tempi","Tempos"],"Tempi v. a. in der Musik."],
+];
+const SING_CORE = [
+ ["die Kenntnisse",["die Kenntnis"],"Die meisten -nis-Wörter sind <i>das</i> – aber: die Kenntnis, Erlaubnis, Befugnis, Finsternis, Wildnis, Besorgnis …"],
+ ["die Erlebnisse",["das Erlebnis"],""],
+ ["die Antibiotika",["das Antibiotikum"],""],
+ ["die Komposita",["das Kompositum"],""],
+ ["die Graffiti",["das Graffito","das Graffiti"],"Eigentlich das Graffito; umgangssprachlich auch das Graffiti."],
+ ["die Paparazzi",["der Paparazzo"],""],
+];
+const SING_BONUS = [
+ ["die Visa",["das Visum"],""],
+ ["die Kakteen",["der Kaktus"],""],
+ ["die Mafiosi",["der Mafioso"],""],
+ ["die Tempora",["das Tempus"],""],
+ ["die Genera",["das Genus"],""],
+ ["die Alben",["das Album"],""],
+ ["die Atlanten",["der Atlas"],""],
+ ["die Indizes",["der Index"],""],
+ ["die Modi",["der Modus"],""],
+ ["die Praktika",["das Praktikum"],""],
+ ["die Ergebnisse",["das Ergebnis"],""],
+ ["die Befugnisse",["die Befugnis"],"Feminin wie die Kenntnis."],
+ ["die Wildnisse",["die Wildnis"],""],
+ ["die Hindernisse",["das Hindernis"],""],
+ ["die Erlaubnisse",["die Erlaubnis"],""],
+ ["die Bakterien",["die Bakterie","das Bakterium"],""],
+ ["die Viren",["das Virus"],""],
+ ["die Themata",["das Thema"],""],
+ ["die Konti",["das Konto"],""],
+ ["die Tempi",["das Tempo"],""],
+ ["die Carabinieri",["der Carabiniere"],""],
+ ["die Kommata",["das Komma"],""],
+ ["die Lexika",["das Lexikon"],""],
+ ["die Soli",["das Solo"],""],
+];
+const ART_CORE = [
+ ["Lineal",["das"],"Achtung Schreibweise: das Line<b>a</b>l."],
+ ["Wachs",["das"],""],
+ ["Radio",["das"],"In der Schweiz hört man auch: der Radio."],
+ ["Efeu",["der"],""],
+ ["Kamin",["der"],""],
+ ["Thermometer",["das"],"In der Schweiz/Österreich auch: der Thermometer."],
+ ["USA",["die"],"Plural: die Vereinigten Staaten."],
+ ["Baguette",["das"],"Laut Duden auch: die Baguette."],
+ ["Blog",["der"],"Laut Duden auch: das Blog."],
+ ["Butter",["die"],""],
+ ["Cola",["die"],"Regional auch: das Cola."],
+ ["Curry",["das","der"],"Beides richtig."],
+ ["Dress",["das"],"In der Schweiz: das Dress. Duden (Deutschland): der Dress."],
+ ["E-Mail",["die"],"Regional auch: das E-Mail."],
+ ["Event",["das"],"Laut Duden auch: der Event."],
+ ["Geschwulst",["die"],""],
+ ["Gully",["der"],"Laut Duden auch: das Gully."],
+ ["Hinterteil",["das"],""],
+ ["Joghurt",["der"],"Laut Duden auch: das Joghurt; österreichisch die."],
+ ["Konklave",["das"],""],
+ ["Körperteil",["das"],"Laut Duden ist der Körperteil Standard, das ist aber verbreitet."],
+ ["Krake",["die"],"Laut Duden: der Krake."],
+ ["Paprika",["die"],"Laut Duden (Deutschland): der Paprika."],
+ ["Puder",["das"],"Laut Duden: der Puder."],
+ ["Python",["der"],"Die Schlange: der Python."],
+ ["Radar",["das"],"Laut Duden auch: der Radar."],
+ ["Spray",["das"],"Laut Duden auch: der Spray."],
+ ["Tram",["die","das"],"Beides richtig – in der Schweiz meist das Tram."],
+ ["Virus",["das"],"Umgangssprachlich auch: der Virus."],
+ ["Zölibat",["der"],"In der Theologie der Zölibat; allgemein auch das."],
+ ["Breisgau",["der"],"Landschaften auf -gau sind meist maskulin."],
+ ["Toskana",["die"],""],
+ ["Elsass",["das"],""],
+ ["Balkan",["der"],""],
+ ["Kosovo",["der"],"Laut Duden auch: das Kosovo."],
+ ["Deutschland",["das"],"Neutrum – meist ohne Artikel (aber: das wiedervereinigte Deutschland)."],
+ ["Ukraine",["die"],""],
+ ["Türkei",["die"],"Länder auf -ei sind feminin (Türkei, Slowakei, Mongolei)."],
+ ["Libanon",["der"],""],
+ ["Tunnel",["der"],"Süddeutsch/österreichisch auch: das Tunnel."],
+];
+const ART_BONUS = [
+ ["Iran",["der"],""],["Irak",["der"],""],["Jemen",["der"],""],["Sudan",["der"],""],
+ ["Schweiz",["die"],""],["Slowakei",["die"],""],["Niederlande",["die"],"Plural."],["Mongolei",["die"],""],
+ ["Spinat",["der"],""],["Gelee",["das","der"],"Beides möglich."],["Ketchup",["der","das"],"Beides möglich."],
+ ["Kies",["der"],""],["Liter",["der","das"],"Standard der, auch das."],["Meter",["der","das"],"Standard der, auch das."],
+ ["Keks",["der","das"],"Österreichisch: das Keks."],["Gummi",["der","das"],"Radiergummi: der; Material: das oder der."],
+ ["Etikett",["das"],""],["Labyrinth",["das"],""],["Abscheu",["der"],"Selten auch die."],["Matsch",["der"],""],
+ ["Sellerie",["der","die"],"Österreichisch: die Sellerie."],["Bonbon",["das","der"],"Österreichisch meist das."],
+ ["Pyjama",["der","das"],""],["Couch",["die","der"],"Schweiz: der Couch."],["Zeh",["der"],""],
+ ["Bikini",["der"],""],["Prozent",["das"],""],["Sakko",["das","der"],""],["Mündel",["das","der"],""],
+];
+const CASE_CORE = [
+ ["Die Sache hat ","einen Haken",".",["einen Haken"],"Falle! Das war schon richtig: haben + Akkusativ."],
+ ["Er hat den Brief an ","den Herr Dirigent"," gesandt.",["den Herrn Dirigenten"],"„Herr“ und „Dirigent“ gehören beide zur n-Deklination: den Herrn Dirigenten."],
+ ["Er stellt im Film ","der Bösewicht"," dar.",["den Bösewicht"],"jemanden darstellen → Akkusativ."],
+ ["Das tut ","man"," leid.",["einem"],"„man“ hat keine eigenen Fallformen: Dativ = <b>einem</b>, Akkusativ = <b>einen</b>."],
+ ["Das braucht ","man"," nicht zu interessieren.",["einen"],"jemanden interessieren → Akkusativ von man = einen."],
+ ["Der Ruf des ","Advokat"," ist nicht der beste.",["Advokaten"],"n-Deklination: des Advokaten."],
+ ["Der Motor des ","Traktor"," ist kaputt.",["Traktors"],"Traktor wird im Singular stark dekliniert: des Traktors (Plural: die Traktoren)."],
+ ["Er wurde ","der Diebstahl"," bezichtigt.",["des Diebstahls","des Diebstahles"],"bezichtigen + Genitiv."],
+];
+const CASE_BONUS = [
+ ["Ich habe mit dem ","Präsident"," gesprochen.",["Präsidenten"],"n-Deklination."],
+ ["Wir fragen den ","Kunde",".",["Kunden"],"n-Deklination."],
+ ["Das Fell des ","Bär"," ist braun.",["Bären"],"n-Deklination."],
+ ["Ich kann mich nicht an seinen ","Name"," erinnern.",["Namen"],"der Name, den Namen, dem Namen, des Namens."],
+ ["Sie vertraut ihrem ","Nachbar",".",["Nachbarn"],"der Nachbar, dem Nachbarn."],
+ ["Er hat einen guten ","Gedanke",".",["Gedanken"],"der Gedanke, den Gedanken, des Gedankens."],
+ ["Wir gedenken ","die Opfer",".",["der Opfer"],"gedenken + Genitiv."],
+ ["Er ist sich ","seine Schuld"," bewusst.",["seiner Schuld"],"sich einer Sache bewusst sein → Genitiv."],
+ ["Er bedarf ","keine Hilfe",".",["keiner Hilfe"],"bedürfen + Genitiv."],
+ ["Das Herz des ","Patient"," schlägt schwach.",["Patienten"],"n-Deklination."],
+ ["Sie hört auf ihr ","Herz",".",["Herz"],"Falle! Akkusativ: das Herz. Aber: dem Herzen, des Herzens."],
+ ["Er folgt seinem ","Herz",".",["Herzen"],"Dativ: dem Herzen."],
+ ["Es freut ","man",", wenn die Sonne scheint.",["einen"],"jemanden freuen → Akkusativ: einen."],
+ ["Der Zoo kaufte einen neuen ","Elefant",".",["Elefanten"],"n-Deklination."],
+ ["Trotz ","dem Regen"," gingen wir spazieren.",["des Regens"],"Standardsprachlich: trotz + Genitiv."],
+ ["Sie ist die Tochter des ","Bauer",".",["Bauern"],"der Bauer, des Bauern."],
+ ["Ich habe dem ","Junge"," geholfen.",["Jungen"],"n-Deklination."],
+ ["Er wurde ","der Lüge"," überführt.",["der Lüge"],"Falle! Schon korrekt: der Lüge ist Genitiv (feminin)."],
+ ["Man klagte ihn ","den Mord"," an.",["des Mordes","des Mords"],"jemanden einer Sache anklagen → Genitiv."],
+ ["Die Polizei verdächtigt ","der Student",".",["den Studenten"],"verdächtigen + Akkusativ; n-Deklination."],
+];
+const GEN_CORE = [
+ ["der Mord","Der Mann wurde ___ angeklagt.",["des Mordes","des Mords"],"anklagen + Genitiv."],
+ ["das Thema","Die Komplexität ___ überforderte alle.",["des Themas"],"Nur -s, kein -es."],
+ ["ihr Telefon","Der Akku ___ war leer.",["ihres Telefons"],""],
+ ["kein Wort","Sie würdigte ihn ___.",["keines Wortes","keines Worts"],"jemanden keines Wortes würdigen."],
+ ["ihre Seelen","Die Rettung ___ war ihr einziges Ziel.",["ihrer Seelen"],""],
+ ["der Betrug","Man bezichtigte ihn ___.",["des Betrugs","des Betruges"],"bezichtigen + Genitiv."],
+ ["ein Besseres","Die Fakten belehrten ihn ___.",["eines Besseren"],"Feste Wendung: jemanden eines Besseren belehren."],
+ ["die Gemeinheit","Das Ausmass ___ schockierte sie.",["der Gemeinheit"],"Feminin: der + Nomen ohne Endung."],
+ ["jeglicher Kommentar","Er enthielt sich ___.",["jeglichen Kommentars"],"sich enthalten + Genitiv. Vor einem Nomen mit -s wird jeglich- schwach: jeglichen Kommentars."],
+ ["ihre Kleider","Trotz ___ fror sie.",["ihrer Kleider"],""],
+ ["wir","Erbarme dich ___!",["unser"],"Genitiv der Personalpronomen: meiner, deiner, seiner, ihrer, <b>unser</b>, euer, ihrer."],
+ ["beste Gesundheit","Meine Oma ist ___.",["bester Gesundheit"],"Feste Wendung; ohne Artikel → starke Endung -er."],
+ ["sein Leben","Das war der schönste Tag ___.",["seines Lebens"],""],
+ ["die Opfer","Wir gedenken ___.",["der Opfer"],"gedenken + Genitiv."],
+ ["die Fortsetzung","Die Dreharbeiten ___ beginnen bald.",["der Fortsetzung"],""],
+ ["seine Taten","Er schämte sich ___.",["seiner Taten"],"sich einer Sache schämen (gehoben)."],
+ ["das (Pronomen)","Ich bin mir ___ bewusst.",["dessen"],"Genitiv von das (Demonstrativpronomen) = dessen."],
+ ["die Lüge","Sie überführten ihn ___.",["der Lüge"],"jemanden einer Sache überführen."],
+ ["die Spionage","Er wurde ___ verdächtigt.",["der Spionage"],"jemanden einer Sache verdächtigen."],
+ ["er","Sie nahm sich ___ an.",["seiner"],"sich jemandes annehmen."],
+ ["ihre gegenseitige Zuneigung","Trotz ___ trennten sie sich.",["ihrer gegenseitigen Zuneigung"],"Nach Artikelwort im Genitiv: Adjektiv auf -en."],
+];
+const GEN_BONUS = [
+ ["der Name","Die Bedeutung ___ ist unklar.",["des Namens"],"Gemischte Deklination: des Namens."],
+ ["ihr Herz","Sie sprach aus der Tiefe ___.",["ihres Herzens"],"das Herz, des Herzens."],
+ ["der Gedanke","Die Kraft ___ ist enorm.",["des Gedankens"],""],
+ ["der Fels","Auf der Spitze ___ stand ein Kreuz.",["des Felsens","des Felsen"],""],
+ ["der Mensch","Die Würde ___ ist unantastbar.",["des Menschen"],"n-Deklination."],
+ ["der Automat","Die Klappe ___ klemmt.",["des Automaten"],"n-Deklination."],
+ ["der Nachbar","Der Hund ___ bellt.",["des Nachbarn"],""],
+ ["dieser Herr","Der Hut ___ ist schwarz.",["dieses Herrn"],"des Herrn (Plural: die Herren)."],
+ ["mancher Kollege","Die Meinung ___ überrascht.",["manches Kollegen"],""],
+ ["ich","Gedenke ___!",["meiner"],""],
+ ["ihr (2. Person Plural)","Wir erinnern uns ___.",["euer"],"sich jemandes erinnern (gehoben)."],
+ ["der Friede","Im Namen ___ …",["des Friedens"],""],
+ ["der Buchstabe","Die Form ___ ist seltsam.",["des Buchstabens"],""],
+ ["das Drama","Der Höhepunkt ___ kam spät.",["des Dramas"],""],
+ ["ein Jahr","Im Laufe ___ änderte sich viel.",["eines Jahres","eines Jahrs"],""],
+ ["der Zeuge","Die Aussage ___ war entscheidend.",["des Zeugen"],"n-Deklination."],
+ ["der Pilot","Die Ruhe ___ beruhigte alle.",["des Piloten"],"n-Deklination."],
+ ["das Museum","Die Sammlung ___ ist berühmt.",["des Museums"],""],
+ ["der Euro","Der Wert ___ steigt.",["des Euro","des Euros"],""],
+ ["sie (Plural)","Wir harrten ___.",["ihrer"],"jemandes harren (gehoben)."],
+];
+
+/* ================= ITEM-AUFBAU ================= */
+const ITEMS = {};
+const EX = {
+ plural:{n:1,title:"Singular → Plural",desc:"Du siehst den Singular und tippst den Plural.",items:[]},
+ singular:{n:2,title:"Plural → Singular",desc:"Du siehst den Plural und tippst Artikel + Singular.",items:[]},
+ article:{n:3,title:"der, die oder das?",desc:"Klicke auf den richtigen Artikel.",items:[]},
+ cases:{n:4,title:"Fälle korrigieren",desc:"Setze das markierte Wort in den richtigen Fall – manchmal ist es schon richtig!",items:[]},
+ genitiv:{n:5,title:"Genitiv-Lückentext",desc:"Setze die Wörter in den Genitiv.",items:[]},
+};
+function add(ex,i,obj,bonus){const id=ex+(bonus?"-b":"-")+i;const it={id,ex,bonus,...obj};ITEMS[id]=it;EX[ex].items.push(it)}
+PLURAL_CORE.forEach((r,i)=>add("plural",i,{kind:"type",prompt:r[0],prefix:"die",a:r[1],note:r[2],hint:r[3]||""}));
+PLURAL_BONUS.forEach((r,i)=>add("plural",i,{kind:"type",prompt:r[0],prefix:"die",a:r[1],note:r[2]},true));
+SING_CORE.forEach((r,i)=>add("singular",i,{kind:"type",prompt:r[0],a:r[1],note:r[2]}));
+SING_BONUS.forEach((r,i)=>add("singular",i,{kind:"type",prompt:r[0],a:r[1],note:r[2]},true));
+ART_CORE.forEach((r,i)=>add("article",i,{kind:"choice",prompt:r[0],a:r[1],note:r[2]}));
+ART_BONUS.forEach((r,i)=>add("article",i,{kind:"choice",prompt:r[0],a:r[1],note:r[2]},true));
+CASE_CORE.forEach((r,i)=>add("cases",i,{kind:"type",s:[r[0],r[1],r[2]],a:r[3],note:r[4]}));
+CASE_BONUS.forEach((r,i)=>add("cases",i,{kind:"type",s:[r[0],r[1],r[2]],a:r[3],note:r[4]},true));
+GEN_CORE.forEach((r,i)=>add("genitiv",i,{kind:"type",base:r[0],sent:r[1],a:r[2],note:r[3]}));
+GEN_BONUS.forEach((r,i)=>add("genitiv",i,{kind:"type",base:r[0],sent:r[1],a:r[2],note:r[3]},true));
+
+/* ================= SPEICHER ================= */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let MISS=store.get("dt_miss",{});   // id -> Anzahl Fehler gesamt
+let HIST=store.get("dt_hist",{});   // id -> letzte falsche Antworten
+let LIB=store.get("dt_lib",{});     // id -> {added, streak}
+let PREF=store.get("dt_pref",{bonus:true});
+for(const id in LIB) if(!ITEMS[id]) delete LIB[id];
+const LIB_THRESHOLD=2;
+function save(){store.set("dt_miss",MISS);store.set("dt_hist",HIST);store.set("dt_lib",LIB);store.set("dt_pref",PREF);updateLibCount()}
+function updateLibCount(){document.getElementById("libCount").textContent=Object.keys(LIB).length}
+
+/* ================= HILFEN ================= */
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const norm=s=>s.replace(/\u00df/g,"ss").trim().replace(/\s+/g," ").replace(/[.!?,;]+$/,"");
+function lev(a,b){const m=a.length,n=b.length;const d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function fullAnswer(it,ans){ans=ans??it.a[0];
+ if(it.ex==="plural")return "die "+ans;
+ if(it.ex==="article")return ans+" "+it.prompt;
+ if(it.ex==="cases")return it.s[0]+ans+it.s[2];
+ if(it.ex==="genitiv")return it.sent.replace("___",ans);
+ return ans}
+function questionText(it){
+ if(it.ex==="cases")return it.s[0]+"["+it.s[1]+"]"+it.s[2];
+ if(it.ex==="genitiv")return it.sent.replace("___","___ ("+it.base+")");
+ if(it.ex==="plural")return it.prompt+" → die …";
+ if(it.ex==="singular")return it.prompt+" → Singular?";
+ return it.prompt+" → der/die/das?"}
+function check(it,raw){
+ let v=norm(raw);
+ if(it.ex==="plural")v=v.replace(/^die\s+/i,"");
+ const exact=it.a.find(a=>a===v);
+ if(exact)return{ok:true,match:exact};
+ const ci=it.a.find(a=>a.toLowerCase()===v.toLowerCase());
+ if(ci)return{ok:true,match:ci,caseWarn:true};
+ const close=v.length>3&&it.a.some(a=>lev(a.toLowerCase(),v.toLowerCase())===1);
+ return{ok:false,close};
+}
+
+/* ================= SESSION ================= */
+let S=null;
+function startSession(mode,ids){
+ const list=ids||EX[mode].items.filter(it=>PREF.bonus||!it.bonus).map(it=>it.id);
+ S={mode,queue:shuffle(list),total:list.length,cleared:0,right:0,wrong:0,miss:{},firstTry:0,cur:null,answered:false};
+ next();
+}
+function next(){
+ if(!S.queue.length)return renderEnd();
+ S.cur=ITEMS[S.queue.shift()];S.answered=false;renderItem();
+}
+function markResult(ok,given){
+ const it=S.cur,id=it.id;S.answered=true;let addedToLib=false;
+ if(ok){
+  S.right++;S.cleared++;if(!S.miss[id])S.firstTry++;
+  if(LIB[id]){LIB[id].streak=(LIB[id].streak||0)+1}
+ }else{
+  S.wrong++;S.miss[id]=(S.miss[id]||0)+1;
+  MISS[id]=(MISS[id]||0)+1;
+  HIST[id]=[given||"(keine Antwort)",...(HIST[id]||[]).filter(x=>x!==given)].slice(0,4);
+  if(LIB[id])LIB[id].streak=0;
+  else if(MISS[id]>=LIB_THRESHOLD){LIB[id]={added:Date.now(),streak:0};addedToLib=true}
+  // nach einiger Zeit wiederholen: 3–5 Karten später
+  const pos=Math.min(S.queue.length,3+Math.floor(Math.random()*3));
+  S.queue.splice(pos,0,id);
+ }
+ save();return addedToLib;
+}
+
+/* ================= RENDER: STARTSEITE ================= */
+function renderHome(){
+ S=null;
+ const libN=Object.keys(LIB).length;
+ let h=`<div class="grid">`;
+ for(const k in EX){const e=EX[k];const core=e.items.filter(i=>!i.bonus).length,bon=e.items.length-core;
+  h+=`<div class="card ex" data-ex="${k}"><div class="num">Übung ${e.n}</div><h3>${e.title}</h3><p>${e.desc}</p><div class="meta">${core} Wörter${PREF.bonus?` + ${bon} Bonus`:""}</div></div>`}
+ h+=`<div class="card ex lib" data-lib="1"><div class="num">Fehler-Bibliothek</div><h3>📚 ${libN} Karte${libN===1?"":"n"}</h3><p>Alles, was du mindestens ${LIB_THRESHOLD}× falsch hattest. Durchschauen und gezielt üben.</p></div>`;
+ h+=`</div><div class="opts"><label><input type="checkbox" id="bonusChk" ${PREF.bonus?"checked":""}> Zusätzliche schwierige Bonus-Wörter einbeziehen</label></div>
+ <p class="keys">Falsche Antworten kommen nach 3–5 Karten noch einmal. Tastatur: <kbd>Enter</kbd> prüfen / weiter · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> für der/die/das.</p>`;
+ app.innerHTML=h;
+ app.querySelectorAll("[data-ex]").forEach(el=>el.onclick=()=>startSession(el.dataset.ex));
+ app.querySelector("[data-lib]").onclick=renderLib;
+ document.getElementById("bonusChk").onchange=e=>{PREF.bonus=e.target.checked;save();renderHome()};
+}
+
+/* ================= RENDER: KARTE ================= */
+function renderItem(){
+ const it=S.cur,e=EX[it.ex];
+ const pct=Math.round(S.cleared/S.total*100);
+ const rep=S.miss[it.id]?`<span class="tag rep">🔁 Wiederholung</span>`:"";
+ const bonus=it.bonus?`<span class="tag bonus">Bonus</span>`:"";
+ const inLib=LIB[it.id]?`<span class="tag rep">📚 Bibliothek</span>`:"";
+ let body="";
+ if(it.ex==="plural"){
+  const [art,...w]=it.prompt.split(" ");
+  body=`<div class="prompt"><span class="art">${art}</span> ${esc(w.join(" "))}</div><div class="hint">${it.hint?esc(it.hint)+" · ":""}Wie lautet der Plural?</div>${inputHtml("die")}`;
+ }else if(it.ex==="singular"){
+  body=`<div class="prompt"><span class="art">die</span> ${esc(it.prompt.slice(4))}</div><div class="hint">Tippe Artikel + Singular (z. B. „das Haus“).</div>${inputHtml("")}`;
+ }else if(it.ex==="article"){
+  body=`<div class="prompt">${esc(it.prompt)}</div><div class="hint">Welcher Artikel?</div>
+  <div class="arts">${["der","die","das"].map((a,i)=>`<button class="${a}" data-a="${a}">${a}<small>${i+1}</small></button>`).join("")}</div>`;
+ }else if(it.ex==="cases"){
+  body=`<div class="hint">Korrigiere das markierte Wort (oder schreib es ab, wenn es schon stimmt).</div>
+  <div class="sentence">${esc(it.s[0])}<mark>${esc(it.s[1])}</mark>${esc(it.s[2])}</div>${inputHtml("")}`;
+ }else if(it.ex==="genitiv"){
+  const [b,a]=it.sent.split("___");
+  body=`<div class="hint">Setze <b>${esc(it.base)}</b> in den Genitiv.</div>
+  <div class="sentence">${esc(b)}<span class="blank">?</span>${esc(a)} <span class="base">(${esc(it.base)})</span></div>${inputHtml("")}`;
+ }
+ const label=S.mode==="lib"?"Fehler-Bibliothek · "+e.title:"Übung "+e.n+" · "+e.title;
+ app.innerHTML=`<div class="topbar"><button class="back" id="backBtn">← Zurück</button><div class="bar"><i style="width:${pct}%"></i></div><span class="count">${S.cleared}/${S.total}</span></div>
+ <div class="card" id="cardEl"><div class="kicker">${esc(label)} ${bonus}${rep}${inLib}</div>${body}
+ ${it.kind==="type"?`<div class="actions"><button class="btn" id="checkBtn">Prüfen</button><button class="btn ghost" id="skipBtn">Weiss ich nicht</button></div>`:""}
+ <div class="fb" id="fb"></div>
+ <div class="actions" id="nextWrap" style="display:none"><button class="btn" id="nextBtn">Weiter →</button></div></div>`;
+ document.getElementById("backBtn").onclick=()=>S.mode==="lib"?renderLib():renderHome();
+ document.getElementById("nextBtn").onclick=next;
+ if(it.kind==="type"){
+  const inp=document.getElementById("inp");inp.focus();
+  document.getElementById("checkBtn").onclick=()=>submitType(inp.value);
+  document.getElementById("skipBtn").onclick=()=>submitType("",true);
+  app.querySelectorAll(".uml button").forEach(b=>b.onmousedown=ev=>{ev.preventDefault();const s=inp.selectionStart,en=inp.selectionEnd;inp.value=inp.value.slice(0,s)+b.textContent+inp.value.slice(en);inp.setSelectionRange(s+1,s+1);inp.focus()});
+ }else{
+  app.querySelectorAll(".arts button").forEach(b=>b.onclick=()=>submitChoice(b.dataset.a));
+ }
+}
+function inputHtml(prefix){
+ return `<div class="answer" id="ansBox">${prefix?`<span class="prefix">${prefix}</span>`:""}<input id="inp" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Antwort …"></div>
+ <div class="uml">${["ä","ö","ü","Ä","Ö","Ü"].map(c=>`<button tabindex="-1">${c}</button>`).join("")}</div>`;
+}
+function submitType(val,skip){
+ if(S.answered)return;
+ const it=S.cur;
+ if(!skip&&!norm(val)){document.getElementById("ansBox").classList.add("shake");setTimeout(()=>document.getElementById("ansBox")?.classList.remove("shake"),400);return}
+ const r=skip?{ok:false}:check(it,val);
+ const added=markResult(r.ok,skip?"":norm(val));
+ const inp=document.getElementById("inp");inp.disabled=true;
+ document.getElementById("ansBox").classList.add(r.ok?"ok":"bad");
+ if(!r.ok)document.getElementById("cardEl").classList.add("shake");
+ document.getElementById("checkBtn").disabled=true;document.getElementById("skipBtn").disabled=true;
+ showFeedback(r,skip?"":norm(val),added);
+}
+function submitChoice(a){
+ if(S.answered)return;
+ const it=S.cur,ok=it.a.includes(a);
+ const added=markResult(ok,a);
+ app.querySelectorAll(".arts button").forEach(b=>{b.disabled=true;
+  if(b.dataset.a===a)b.classList.add(ok?"picked-ok":"picked-bad");
+  else if(it.a.includes(b.dataset.a))b.classList.add("is-right")});
+ if(!ok)document.getElementById("cardEl").classList.add("shake");
+ showFeedback({ok,match:a},a,added);
+}
+function showFeedback(r,given,added){
+ const it=S.cur,fb=document.getElementById("fb");
+ const alts=it.a.filter(x=>x!==(r.ok?r.match:it.a[0]));
+ let h="";
+ if(r.ok){
+  h=`<strong>✓ Richtig!</strong> <span>${esc(fullAnswer(it,r.match))}</span>`;
+  if(r.caseWarn)h+=`<div class="sub">Achte auf Gross-/Kleinschreibung: <b>${esc(r.match)}</b></div>`;
+  if(alts.length)h+=`<div class="sub">Auch möglich: ${alts.map(x=>esc(it.ex==="plural"?"die "+x:x)).join(", ")}</div>`;
+ }else{
+  h=`<strong>✗ ${r.close?"Fast – Tippfehler?":"Leider falsch."}</strong><div class="sub">Richtig: <b>${esc(fullAnswer(it))}</b></div>`;
+  if(alts.length)h+=`<div class="sub">Auch möglich: ${alts.map(x=>esc(it.ex==="plural"?"die "+x:x)).join(", ")}</div>`;
+  if(given)h+=`<div class="sub">Deine Antwort: <s>${esc(given)}</s></div>`;
+  h+=`<div class="sub">🔁 Diese Karte kommt gleich noch einmal.</div>`;
+  if(added)h+=`<div class="libmsg">📚 Mehrmals falsch – jetzt in deiner Fehler-Bibliothek.</div>`;
+ }
+ if(it.note)h+=`<div class="note">💡 ${it.note}</div>`;
+ fb.innerHTML=h;fb.className="fb show "+(r.ok?"ok":"bad");
+ document.getElementById("nextWrap").style.display="flex";
+ document.getElementById("nextBtn").focus();
+}
+
+/* ================= RENDER: ENDE ================= */
+function renderEnd(){
+ const missed=Object.keys(S.miss);
+ const acc=S.total?Math.round(S.firstTry/S.total*100):0;
+ let h=`<div class="topbar"><button class="back" id="backBtn">← Übersicht</button><div class="bar"><i style="width:100%"></i></div><span class="count">${S.total}/${S.total}</span></div>
+ <div class="card"><div class="prompt">${acc>=90?"🏆 Hervorragend!":acc>=70?"💪 Gut gemacht!":"📈 Dranbleiben!"}</div>
+ <div class="stats"><div class="stat"><b>${S.firstTry}/${S.total}</b><span>beim 1. Versuch</span></div><div class="stat"><b>${acc}%</b><span>Trefferquote</span></div><div class="stat"><b>${S.wrong}</b><span>Fehler gesamt</span></div></div>`;
+ if(missed.length){h+=`<h3>Diesmal schwierig</h3><div class="list">${missed.map(id=>libRow(ITEMS[id],false,S.miss[id])).join("")}</div>`}
+ h+=`<div class="actions"><button class="btn" id="again">Nochmal</button>${missed.length?`<button class="btn ghost" id="onlyMiss">Nur die Fehler üben (${missed.length})</button>`:""}</div></div>`;
+ app.innerHTML=h;
+ document.getElementById("backBtn").onclick=renderHome;
+ const mode=S.mode;
+ document.getElementById("again").onclick=()=>mode==="lib"?startSession("lib",Object.keys(LIB)):startSession(mode);
+ const om=document.getElementById("onlyMiss");if(om)om.onclick=()=>startSession(mode,missed);
+}
+
+/* ================= RENDER: BIBLIOTHEK ================= */
+let libFilter="all";
+function libRow(it,removable,cnt){
+ const n=cnt??MISS[it.id]??0;const lib=LIB[it.id];
+ const wrongs=(HIST[it.id]||[]).filter(Boolean);
+ const mast=lib&&lib.streak>=3?`<span class="mast">✓ ${lib.streak}× in Folge richtig</span>`:"";
+ return `<div class="li"><div class="main"><div class="n">${esc(EX[it.ex].title)}</div><div class="q">${esc(questionText(it))}</div>
+ <div class="a">✓ ${esc(fullAnswer(it))}${it.a.length>1?` <span class="n">(auch: ${it.a.slice(1).map(esc).join(", ")})</span>`:""}</div>
+ ${wrongs.length?`<div class="w">✗ ${wrongs.map(esc).join(" · ")}</div>`:""}
+ ${it.note?`<div class="n">💡 ${it.note}</div>`:""}</div>
+ <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end"><span class="cnt">${n}× falsch</span>${mast}${removable?`<button class="x" title="Aus Bibliothek entfernen" data-rm="${it.id}">✕</button>`:""}</div></div>`;
+}
+function renderLib(){
+ S=null;
+ const ids=Object.keys(LIB).filter(id=>libFilter==="all"||ITEMS[id].ex===libFilter).sort((a,b)=>(MISS[b]||0)-(MISS[a]||0));
+ const allN=Object.keys(LIB).length;
+ let h=`<div class="topbar"><button class="back" id="backBtn">← Übersicht</button></div>
+ <div class="card"><div class="prompt">📚 Fehler-Bibliothek</div><div class="hint">Karten, die du mindestens ${LIB_THRESHOLD}× falsch hattest. Nach 3 richtigen Antworten in Folge bekommst du ein ✓ – dann kannst du sie entfernen.</div>
+ <div class="filter"><button data-f="all" class="${libFilter==="all"?"on":""}">Alle (${allN})</button>${Object.keys(EX).map(k=>{const c=Object.keys(LIB).filter(id=>ITEMS[id].ex===k).length;return c?`<button data-f="${k}" class="${libFilter===k?"on":""}">${EX[k].title} (${c})</button>`:""}).join("")}</div>
+ <div class="actions"><button class="btn" id="practice" ${ids.length?"":"disabled"}>Diese ${ids.length} Karten üben</button>${allN?`<button class="btn ghost" id="clearM">Gemeisterte entfernen</button>`:""}</div>`;
+ h+=ids.length?`<div class="list">${ids.map(id=>libRow(ITEMS[id],true)).join("")}</div>`:`<div class="empty">Noch leer – super! Karten landen hier, wenn du sie ${LIB_THRESHOLD}× falsch beantwortest.</div>`;
+ h+=`<div class="actions" style="margin-top:24px"><button class="btn ghost" id="reset">Gesamten Fortschritt zurücksetzen</button></div></div>`;
+ app.innerHTML=h;
+ document.getElementById("backBtn").onclick=renderHome;
+ app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{libFilter=b.dataset.f;renderLib()});
+ app.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{delete LIB[b.dataset.rm];save();renderLib()});
+ document.getElementById("practice").onclick=()=>startSession("lib",ids);
+ const cm=document.getElementById("clearM");if(cm)cm.onclick=()=>{for(const id in LIB)if((LIB[id].streak||0)>=3)delete LIB[id];save();renderLib()};
+ document.getElementById("reset").onclick=()=>{if(confirm("Wirklich alle Fehler und die Bibliothek löschen?")){MISS={};HIST={};LIB={};save();renderLib()}};
+}
+
+/* ================= TASTATUR ================= */
+document.addEventListener("keydown",e=>{
+ if(!S||!S.cur||!document.getElementById("cardEl"))return;
+ if(e.key==="Enter"){
+  e.preventDefault();
+  if(S.answered)next();
+  else if(S.cur.kind==="type")submitType(document.getElementById("inp").value);
+ }else if(!S.answered&&S.cur.kind==="choice"&&["1","2","3"].includes(e.key)){
+  submitChoice(["der","die","das"][+e.key-1]);
+ }
+});
+document.getElementById("home").onclick=renderHome;
+document.getElementById("libPill").onclick=renderLib;
+updateLibCount();renderHome();
+</script>
+</body>
+</html>
